@@ -1,23 +1,9 @@
+#include "glad/glHelp.h"
 #include "glad/glad.h"
 #include "WndProc.h"
 
 #include <stdio.h>
 #include <Windows.h>
-
-#define glCall(x) \
-    while (glGetError() != GL_NO_ERROR); \
-    x; \
-    { \
-        GLenum error = glGetError(); \
-        if (error != GL_NO_ERROR) { \
-            char buffer[256]; \
-            snprintf(buffer, sizeof(buffer), \
-                "OpenGL Error: 0x%X at line %d in %s\nFunction: %s\n", \
-                error, __LINE__, __FILE__, #x); \
-            OutputDebugStringA(buffer); \
-            __debugbreak(); \
-        } \
-    }
 
 extern HDC hdc;
 extern HGLRC rc;
@@ -69,7 +55,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	float coords[12] = {
 		0.0f, 0.0f, 0.0f,
-		0.0f, 0.1f, 1.0f,
+		0.0f, 0.0f, 1.0f,
 		1.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 1.0f,
 	};
@@ -83,10 +69,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	glCall(glGenVertexArrays(1, &VAO));
 	glCall(glBindVertexArray(VAO));
-
-	glCall(glGenBuffers(1, &VBO));
-	glCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-	glCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, coords, GL_STATIC_DRAW));
 
 	glCall(glGenBuffers(1, &IBO));
 	glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
@@ -118,6 +100,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	glCall(glDeleteShader(VertexShader));
 	glCall(glDeleteShader(FragmentShader));
+
+	unsigned int texture;
 
 	GLboolean isProgram = glIsProgram(ShaderProgram);
 	if (!isProgram) {

@@ -131,12 +131,16 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Mesh\VertexBuffer.cpp" />
     <ClCompile Include="src\WndProc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\glad\glad.h" />
+    <ClInclude Include="include\glad\glHelp.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
-    <ClInclude Include="include\VertexBuffer.h" />
+    <ClInclude Include="include\Mesh\IndexBuffer.h" />
+    <ClInclude Include="include\Mesh\VertexArray.h" />
+    <ClInclude Include="include\Mesh\VertexBuffer.h" />
     <ClInclude Include="include\WndProc.h" />
   </ItemGroup>
   <ItemGroup>
