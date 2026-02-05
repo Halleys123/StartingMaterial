@@ -1,6 +1,18 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "glad/glHelp.h"
 #include "glad/glad.h"
+#include "math.h"
+
 #include "WndProc.h"
+#include "Mesh/Mesh.h"
+#include "Material/Shader.h"
+
+// Will someday use my own matrix, for now perspective matrix is also difficult to create, and will take a lot of time to just setup matrix class
+// So for now focusing on main opengl then will come back for matrix and all
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "stb_image.h"
 
 #include <stdio.h>
 #include <Windows.h>
@@ -10,25 +22,8 @@ extern HGLRC rc;
 
 static const float aspectRatio = 4.0 / 3.0f;
 
-static const int WndHeight = 400;
+static const int WndHeight = 600;
 static const int WndWidth = WndHeight * aspectRatio;
-
-const char* VertexShaderSrc =
-"#version 330 core\n"
-"layout(location = 0) in vec3 VertexPos;\n"
-"out vec3 frag_pos;\n"
-"void main() {\n"
-"    frag_pos = VertexPos;\n"
-"    gl_Position = vec4(VertexPos, 1.0);\n"
-"}\n\0";
-
-const char* FragmentShaderSrc =
-"#version 330 core\n"
-"in vec3 frag_pos;\n"
-"out vec4 FragColor;\n"
-"void main() {\n"
-"    FragColor = vec4(frag_pos, 1.0);\n"
-"}\n\0";
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmd) {
 	WNDCLASS wnd = { 0 };
@@ -53,11 +48,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	bool running = true;
 	MSG msg = { 0 };
 
-	float coords[12] = {
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 1.0f,
+	float coords[20] = {
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f, 1.0f
 	};
 
 	unsigned int index[6] = {
@@ -65,57 +60,42 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		1, 2, 3
 	};
 
-	unsigned int VAO, VBO, IBO;
+	glm::mat4 perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+	glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	glCall(glGenVertexArrays(1, &VAO));
-	glCall(glBindVertexArray(VAO));
+	perspective = perspective * view;
 
-	glCall(glGenBuffers(1, &IBO));
-	glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
-	glCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, index, GL_STATIC_DRAW));
+	SHADER_CONFIG list[2] = { { SHADER_STAGE::VERTEX, "./shaders/item.vert" }, { SHADER_STAGE::FRAGMT, "./shaders/item.frag" } };
 
-	// Try moving it above vbo setup
-	glCall(glEnableVertexAttribArray(0));
-	glCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0));
+	Mesh plane(20, coords, 6, index, GL_STATIC_DRAW);
+	plane.setVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	plane.setVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
+	Shader myShader(2, list);
 
-	glCall(glBindVertexArray(0));
+	myShader.UseProgram();
+	myShader.ModifyUniform("perspective_matrix", perspective);
 
-	unsigned int ShaderProgram, VertexShader, FragmentShader;
+	unsigned int texture, sampler;
 
-	glCall(ShaderProgram = glCreateProgram());
-	
-	glCall(VertexShader = glCreateShader(GL_VERTEX_SHADER));
-	glCall(FragmentShader = glCreateShader(GL_FRAGMENT_SHADER));
-	
-	glCall(glShaderSource(VertexShader, 1, &VertexShaderSrc, NULL));
-	glCall(glShaderSource(FragmentShader, 1, &FragmentShaderSrc, NULL));
+	int x, y, c;
+	stbi_set_flip_vertically_on_load(1);
+	unsigned char* image = stbi_load("./textures/ground.jpg", &x, &y, &c, 0);
 
-	glCall(glCompileShader(VertexShader));
-	glCall(glCompileShader(FragmentShader));
+	glCall(glGenTextures(1, &texture));
+	glCall(glBindTexture(GL_TEXTURE_2D, texture));
+	glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, image));
 
-	glCall(glAttachShader(ShaderProgram, VertexShader));
-	glCall(glAttachShader(ShaderProgram, FragmentShader));
+	glCall(glGenSamplers(1, &sampler));
 
-	glCall(glLinkProgram(ShaderProgram));
+	glCall(glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	glCall(glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	glCall(glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+	glCall(glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 
-	glCall(glDeleteShader(VertexShader));
-	glCall(glDeleteShader(FragmentShader));
+	glCall(glActiveTexture(GL_TEXTURE0));
+	glCall(glBindSampler(0, sampler));
 
-	unsigned int texture;
-
-	GLboolean isProgram = glIsProgram(ShaderProgram);
-	if (!isProgram) {
-		OutputDebugStringA("ERROR: ShaderProgram is NOT a valid program object!\n");
-		__debugbreak();
-	}
-	else {
-		OutputDebugStringA("ShaderProgram is a valid program object.\n");
-	}
-
-	glCall(glUseProgram(ShaderProgram));
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	myShader.ModifyUniform("tex", 0);
 
 	while (running) {
 		if (msg.message == WM_QUIT) running = false;
@@ -128,8 +108,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, index);
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		plane.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);;
+
 		SwapBuffers(hdc);
 	}
 

@@ -4,7 +4,14 @@
 
 class VertexBuffer {
 private:
-	unsigned int VBO;
+	unsigned int VertexBufferID;
+	int count;
 public:
-	VertexBuffer(int count, int size, float* data, GLenum DrawType);
+	VertexBuffer();
+	VertexBuffer(int count, float* data, GLenum DrawType);
+	void AddData(int count, float* data, GLenum DrawType);
+	unsigned int getVertexBufferID();
+	void Unbind();
+	void Bind();
+	int getCount();
 };
