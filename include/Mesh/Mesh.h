@@ -11,8 +11,15 @@ private:
 	IndexBuffer IBO;
 	VertexBuffer VBO;
 
+	bool UseElements = false;
+	int VertexCount;
+
 public:
-	Mesh(int vertexCount, float* vertex, int indexCount, unsigned int* index, GLenum DrawType);
+	Mesh();
+	Mesh(int vertexCount, float* vertex, int indexCount, unsigned int* index, GLenum DrawType = GL_STATIC_DRAW);
+	void Init(int vertexCount, float* vertex, int indexCount, unsigned int* index, GLenum DrawType = GL_STATIC_DRAW);
 	void Draw(GLenum ShapeToDraw, GLenum DataType);
+	void DrawElements(GLenum ShapeToDraw, GLenum DataType);
+	void DrawArray(GLenum ShapeToDraw, GLenum DataType);
 	void setVertexAttribPointer(unsigned int location, int elementCount, GLenum dataType, GLenum shouldNormalize, int stride, const void* StartFrom);
 };

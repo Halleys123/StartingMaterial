@@ -14,7 +14,6 @@ void VertexArray::Unbind() {
 	glCall(glBindVertexArray(0));
 }
 
-
 void VertexArray::setVertexAttribPointer(VertexBuffer& VertexBufferObject, unsigned int location, int elementCount, GLenum dataType, GLboolean shouldNormalize, int stride, const void* pointer) {
 	Bind();
 	VertexBufferObject.Bind();

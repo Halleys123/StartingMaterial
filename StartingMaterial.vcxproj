@@ -278,6 +278,8 @@
       <FileType>CppCode</FileType>
     </None>
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Lights\PointLight.cpp" />
+    <ClCompile Include="src\Material\Material.cpp" />
     <ClCompile Include="src\Material\Sampler.cpp" />
     <ClCompile Include="src\Material\Texture.cpp" />
     <ClCompile Include="src\Mesh\IndexBuffer.cpp" />
@@ -285,7 +287,7 @@
     <ClCompile Include="src\Mesh\VertexArray.cpp" />
     <ClCompile Include="src\Mesh\VertexBuffer.cpp" />
     <ClCompile Include="src\Material\Shader.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\Utils\generateSphere.cpp" />
     <ClCompile Include="src\WndProc.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -582,6 +584,8 @@
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\KHR\khrplatform.h" />
+    <ClInclude Include="include\Lights\PointLight.h" />
+    <ClInclude Include="include\Material\Material.h" />
     <ClInclude Include="include\Material\Sampler.h" />
     <ClInclude Include="include\Material\Texture.h" />
     <ClInclude Include="include\Mesh\IndexBuffer.h" />
@@ -590,15 +594,27 @@
     <ClInclude Include="include\Mesh\VertexBuffer.h" />
     <ClInclude Include="include\Material\Shader.h" />
     <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="include\Utils\generateSphere.h" />
     <ClInclude Include="include\WndProc.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="shaders\light.frag" />
     <None Include="StartingMaterial.slnx" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\box.png" />
+    <Image Include="textures\box_spec.png" />
+    <Image Include="textures\crate.jpg" />
+    <Image Include="textures\crate_height.png" />
+    <Image Include="textures\crate_normal.jpg" />
+    <Image Include="textures\crate_rough.jpg" />
     <Image Include="textures\ground.jpg" />
+    <Image Include="textures\metal.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\light.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

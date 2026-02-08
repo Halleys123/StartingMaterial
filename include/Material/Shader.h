@@ -33,5 +33,10 @@ public:
 	Shader(int count, SHADER_CONFIG* shadersList);
 	void UseProgram();
 	void ModifyUniform(const char* UnfiromName, glm::mat4& matrix);
+	void ModifyUniform(const char* UniformName, glm::vec3& value);
+	void ModifyUniform(const char* UniformName, float x, float y, float z);
+	void ModifyUniformArray(const char* UniformName, int count, float* values);
+	void ModifyUniform1fArray(const char* UniformName, int count, float value[]);
 	void ModifyUniform(const char* UniformName, int value);
+	void ModifyUniform(const char* UniformName, float value);
 };

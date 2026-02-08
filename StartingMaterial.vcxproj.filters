@@ -45,10 +45,16 @@
     <ClCompile Include="include\glm\detail\glm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Texture.cpp">
+    <ClCompile Include="src\Material\Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Material\Sampler.cpp">
+    <ClCompile Include="src\Lights\PointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Material\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\generateSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -959,6 +965,15 @@
     <ClInclude Include="include\Material\Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Lights\PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Material\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\generateSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="StartingMaterial.slnx" />
@@ -1390,10 +1405,35 @@
     <None Include="include\glm\detail\type_vec4.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="shaders\light.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\ground.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="textures\metal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\box.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\box_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\crate.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\crate_height.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\crate_normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\crate_rough.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\light.vert" />
   </ItemGroup>
 </Project>

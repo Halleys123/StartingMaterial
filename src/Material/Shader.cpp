@@ -58,7 +58,7 @@ void Shader::LoadShader(const char* filePath, SHADER_STAGE TYPE) {
 	}
 
 	shaderSrc[index] = '\0';
-	OutputDebugString(shaderSrc);
+	//OutputDebugString(shaderSrc);
 
 	fclose(file);
 
@@ -113,10 +113,50 @@ void Shader::ModifyUniform(const char* UniformName, glm::mat4& matrix) {
 	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
 	if (uniform == -1) {
 		OutputDebugString("No such uniform found");
-		__debugbreak();
+		//__debugbreak();
 	}
 
 	glCall(glUniformMatrix4fv(uniform, 1, GL_FALSE, &matrix[0][0]));
+}
+
+void Shader::ModifyUniform(const char* UniformName, glm::vec3& value) {
+	UseProgram();
+	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
+	if (uniform == -1) {
+		OutputDebugString("No such uniform found");
+		//__debugbreak();
+	}
+
+	glCall(glUniform3fv(uniform, 1, &value[0]));
+}
+void Shader::ModifyUniform(const char* UniformName, float a, float b, float c) {
+	UseProgram();
+	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
+	if (uniform == -1) {
+		OutputDebugString("No such uniform found");
+		//__debugbreak();
+	}
+
+	glUniform3f(uniform, a, b, c);
+}
+
+void Shader::ModifyUniformArray(const char* UniformName, int count, float value[]) {
+	UseProgram();
+
+	int uniform = glGetUniformLocation(ShaderProgram, UniformName);
+	if (uniform == -1) {
+		// Try array base element name
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s[0]", UniformName);
+		uniform = glGetUniformLocation(ShaderProgram, buf);
+	}
+
+	if (uniform == -1) {
+		OutputDebugString("No such uniform found");
+		//__debugbreak();
+	}
+
+	glCall(glUniform3fv(uniform, count, value));
 }
 
 void Shader::ModifyUniform(const char* UniformName, int value) {
@@ -124,8 +164,30 @@ void Shader::ModifyUniform(const char* UniformName, int value) {
 	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
 	if (uniform == -1) {
 		OutputDebugString("No such uniform found");
-		__debugbreak();
+		//__debugbreak();
 	}
 
 	glCall(glUniform1i(uniform, value));
+}
+
+void Shader::ModifyUniform(const char* UniformName, float value) {
+	UseProgram();
+	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
+	if (uniform == -1) {
+		OutputDebugString("No such uniform found");
+		//__debugbreak();
+	}
+
+	glCall(glUniform1f(uniform, value));
+}
+
+void Shader::ModifyUniform1fArray(const char* UniformName, int count, float value[]) {
+	UseProgram();
+	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));
+	if (uniform == -1) {
+		OutputDebugString("No such uniform found");
+		//__debugbreak();
+	}
+
+	glCall(glUniform1fv(uniform, count, value));
 }
