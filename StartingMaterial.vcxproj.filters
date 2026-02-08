@@ -57,6 +57,9 @@
     <ClCompile Include="src\Utils\generateSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils\generateCylinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\WndProc.h">
@@ -972,6 +975,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Utils\generateSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\generateCylinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -287,6 +287,7 @@
     <ClCompile Include="src\Mesh\VertexArray.cpp" />
     <ClCompile Include="src\Mesh\VertexBuffer.cpp" />
     <ClCompile Include="src\Material\Shader.cpp" />
+    <ClCompile Include="src\Utils\generateCylinder.cpp" />
     <ClCompile Include="src\Utils\generateSphere.cpp" />
     <ClCompile Include="src\WndProc.cpp" />
   </ItemGroup>
@@ -594,6 +595,7 @@
     <ClInclude Include="include\Mesh\VertexBuffer.h" />
     <ClInclude Include="include\Material\Shader.h" />
     <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="include\Utils\generateCylinder.h" />
     <ClInclude Include="include\Utils\generateSphere.h" />
     <ClInclude Include="include\WndProc.h" />
   </ItemGroup>

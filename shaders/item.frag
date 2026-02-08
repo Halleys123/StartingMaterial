@@ -27,7 +27,7 @@ uniform float pointLightStrength[10];
 
 // Spotlight
 vec3 spotlightColor = vec3(1.0, 1.0, 1.0);
-vec3 spotlightPosition = vec3(2.0, 3.0, 0.0);
+vec3 spotlightPosition = vec3(2.0, 0.0, 0.0);
 vec3 spotlightDirection = normalize(vec3(-1.0, -1.0, 0.0));
 float spotlightCutoff = radians(30.0);
 float spotlightSofteningAngle = radians(40.0);

@@ -8,8 +8,9 @@
 #include "Material/Texture.h"
 #include "Material/Sampler.h"
 #include "Material/Material.h"
-
 #include "Lights/PointLight.h"
+#include "Utils/generateCylinder.h"
+
 // Will someday use my own matrix, for now perspective matrix is also difficult to create, and will take a lot of time to just setup matrix class
 // So for now focusing on main opengl then will come back for matrix and all
 #include "glm/glm.hpp"
@@ -138,9 +139,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		1, 2, 3
 	};
 
-	float radius = 1.0f;
-	int longitude = 36;
-	int latitude = 18;
+	float* myCoords = nullptr;
+	unsigned int* myIndices = nullptr;
+	int cCount, iCount;
+
+	generateCylinder(myCoords, myIndices, cCount, iCount, 2.0f, 0.5f);
 
 	glm::mat4 perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 	glm::mat4 view = glm::lookAt(camPosition, camLookAt, camUp);
@@ -149,8 +152,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	SHADER_CONFIG list[2] = { { SHADER_STAGE::VERTEX, "./shaders/item.vert" }, { SHADER_STAGE::FRAGMT, "./shaders/item.frag" } };
 
-	Mesh plane(192, cubeVertices, 36, cubeIndices, GL_STATIC_DRAW);
+	Mesh plane(192, cubeVertices, 36, cubeIndices);
 	Mesh ground(32, groundCoords, 6, groundIndex);
+	Mesh cylinder(cCount, myCoords, iCount, myIndices);
 	//Material material()
 
 	Shader myShader(2, list);
@@ -176,6 +180,10 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	ground.setVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
 	ground.setVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
 	ground.setVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
+	
+	cylinder.setVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	cylinder.setVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
+	cylinder.setVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
 
 	myShader.UseProgram();
 	myShader.ModifyUniform("tex", 0);
@@ -205,6 +213,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UpdateCameraVectors();
 
 	glEnable(GL_DEPTH_TEST);
+
+	glm::mat4 model = glm::mat4(1.0);
 
 	while (running) {
 
@@ -282,18 +292,25 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		camera = perspective * view;
 
 		PointLight::Update(camPosition, camera);
-
+		
+		model = glm::translate(glm::mat4(1.0), glm::vec3(0.0));
+		
 		myShader.UseProgram();
 		myShader.ModifyUniform("perspective_matrix", camera);
+		myShader.ModifyUniform("model", model);
 		myShader.ModifyUniform("viewPos", camPosition);
+
+		tex.Bind(0, sampler);
+		tex_spec.Bind(1, sampler);
+		plane.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
 
 		ground_tex.Bind(0, sampler);
 		ground_tex_rough.Bind(1, sampler);
 		ground.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
-		
-		tex.Bind(0, sampler);
-		tex_spec.Bind(1, sampler);
-		plane.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
+
+		model = glm::translate(glm::mat4(1.0), glm::vec3(3.0));
+		myShader.ModifyUniform("model", model);
+		cylinder.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
 
 		SwapBuffers(hdc);
 	}

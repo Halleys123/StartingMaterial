@@ -70,6 +70,6 @@ void PointLight::Update(glm::vec3& camPosition, glm::mat4& cameraMatrix) {
 
 		PointLight::lightShader->ModifyUniform("model", model);
 		PointLight::lightShader->ModifyUniform("lightColor", PointLight::lightColors[base], PointLight::lightColors[base + 1], PointLight::lightColors[base + 2]);
-		PointLight::mesh[i].DrawArray(GL_TRIANGLES, GL_UNSIGNED_BYTE);
+		PointLight::mesh[i].DrawArray(GL_LINES, GL_UNSIGNED_BYTE);
 	}
 }
