@@ -1412,6 +1412,8 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="shaders\light.frag" />
+    <None Include="shaders\framebuffer.vert" />
+    <None Include="shaders\framebuffer.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\ground.jpg">

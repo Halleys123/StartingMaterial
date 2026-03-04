@@ -27,7 +27,7 @@ uniform float pointLightStrength[10];
 
 // Spotlight
 vec3 spotlightColor = vec3(1.0, 1.0, 1.0);
-vec3 spotlightPosition = vec3(2.0, 0.0, 0.0);
+vec3 spotlightPosition = vec3(2.0, 3.0, 0.0);
 vec3 spotlightDirection = normalize(vec3(-1.0, -1.0, 0.0));
 float spotlightCutoff = radians(30.0);
 float spotlightSofteningAngle = radians(40.0);
@@ -36,6 +36,12 @@ float spotlightStrengtheningFactor = 2.0;
 float CA = 1.0;
 float LA = 0.09;
 float QA = 0.032;
+
+float near = 0.1, far = 100;
+
+float linearizeDepth(float d) {
+    return (2.0 * near * far) / (far + near - (d * 2.0  - 1.0) * (far - near));
+}
 
 void main() {
     vec3 normal = normalize(frag_normal);
@@ -86,4 +92,5 @@ void main() {
     vec3 lighting = albedo * ( directionalLightContri + netPointLightContri + ambientLight + spotlightColorContri) + netSpecularContri;
 
     FragColor = vec4(lighting, 1.0);
+    // FragColor = vec4(vec3(linearizeDepth(gl_FragCoord.z) / far), 1.0);
 }

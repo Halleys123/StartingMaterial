@@ -181,6 +181,7 @@ void Shader::ModifyUniform(const char* UniformName, float value) {
 	glCall(glUniform1f(uniform, value));
 }
 
+
 void Shader::ModifyUniform1fArray(const char* UniformName, int count, float value[]) {
 	UseProgram();
 	glCall(int uniform = glGetUniformLocation(ShaderProgram, UniformName));

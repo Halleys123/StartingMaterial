@@ -34,6 +34,13 @@ static const float aspectRatio = 16.0f / 10.0f;
 static const int WndHeight = 1280;
 static const int WndWidth = WndHeight * aspectRatio;
 
+#ifdef _WIN32
+extern "C" {
+	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 void UpdateCameraVectors() {
 	camFront = glm::normalize(camFront);
 	camRight = glm::normalize(glm::cross(camFront, worldUp));
@@ -114,17 +121,17 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	// Indices for 12 triangles (6 faces * 2 triangles each)
 	unsigned int cubeIndices[36] = {
 		// Front face
-		0, 1, 2,  0, 2, 3,
+		1, 0, 2,  2, 0, 3,
 		// Back face
-		4, 5, 6,  4, 6, 7,
+		5, 4, 6,  6, 4, 7,
 		// Left face
-		8, 9, 10,  8, 10, 11,
+		9, 8, 10,  10, 8, 11,
 		// Right face
-		12, 13, 14,  12, 14, 15,
+		13, 12, 14,  14, 12, 15,
 		// Top face
-		16, 17, 18,  16, 18, 19,
+		17, 16, 18,  18, 16, 19,
 		// Bottom face
-		20, 21, 22,  20, 22, 23
+		21, 20, 22,  22, 20, 23
 	};
 
 	float groundCoords[32] = {
@@ -172,6 +179,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	PointLight light3(myShader, glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 0.5f, 0.0f), 0.5f);
 	PointLight light4(myShader, glm::vec3(-4.0f, 3.0f, 2.0f), glm::vec3(0.0f, 0.5f, 0.0f), 0.5f);
 	PointLight light5(myShader, glm::vec3(5.5f, 4.0f, -2.0f), glm::vec3(0.7f, 0.5f, 1.0f), 0.5f);
+	PointLight light7(myShader, glm::vec3(3.5f, 8.0f, -2.0f), glm::vec3(1.0f, 0.25f, 1.0f), 2.5f);
 
 	plane.setVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
 	plane.setVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
@@ -213,8 +221,67 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UpdateCameraVectors();
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	//glEnable(GL_STENCIL_TEST);
+	//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-	glm::mat4 model = glm::mat4(1.0);
+	//glStencilMask(0xFF);
+	//glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	//glDepthFunc(GL_NEVER);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glm::mat4 cylinderModel = glm::translate(glm::mat4(1.0), glm::vec3(3.0));
+	glm::mat4 model = glm::translate(glm::mat4(1.0), glm::vec3(0.0));
+
+	float quadVertices[24] = {
+		// positions // texCoords
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f
+	};
+
+	unsigned int quadIndex[6] = {
+		0, 1, 2, 3, 4, 5
+	};
+
+	unsigned int fbo, texObj;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+	glGenTextures(1, &texObj);
+	glBindTexture(GL_TEXTURE_2D, texObj);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WndWidth, WndHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texObj, 0);
+
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WndWidth, WndHeight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		OutputDebugString("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	SHADER_CONFIG scrShaderConf[] = { { SHADER_STAGE::VERTEX, "./shaders/framebuffer.vert" }, { SHADER_STAGE::FRAGMT, "./shaders/framebuffer.frag" } };
+	Shader screenShader(2, scrShaderConf);
+	screenShader.ModifyUniform("screenTexture", 0); // ensure sampler uses texture unit 0
+
+	Mesh quadMesh(24, quadVertices, 6, quadIndex);
+	quadMesh.setVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
+	quadMesh.setVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
 
 	while (running) {
 
@@ -224,12 +291,14 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		float delta = (float)elapsed / (float)frequency.QuadPart;
 
 		last = now;
-
-		if (msg.message == WM_QUIT) running = false;
 		
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+			if (msg.message == WM_QUIT) {
+				running = false;
+				break;
+			}
 		}
 
 		POINT curPoint;
@@ -253,8 +322,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
 
-			yaw += xoffset;
-			pitch += yoffset;
+			yaw += xoffset * 0.75f;
+			pitch += yoffset * 0.75f;
 		}
 
 		if (GetAsyncKeyState('W') & 0x8000) velocity += camFront * acceleration * delta;
@@ -285,19 +354,20 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		camFront = glm::normalize(direction);
 		UpdateCameraVectors();
 
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glViewport(0, 0, WndWidth, WndHeight);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+		glEnable(GL_DEPTH_TEST);
+
 		view = glm::lookAt(camPosition, camPosition + camFront, camUp);
 		camera = perspective * view;
 
 		PointLight::Update(camPosition, camera);
 		
-		model = glm::translate(glm::mat4(1.0), glm::vec3(0.0));
-		
 		myShader.UseProgram();
-		myShader.ModifyUniform("perspective_matrix", camera);
 		myShader.ModifyUniform("model", model);
+		myShader.ModifyUniform("perspective_matrix", camera);
 		myShader.ModifyUniform("viewPos", camPosition);
 
 		tex.Bind(0, sampler);
@@ -308,9 +378,23 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		ground_tex_rough.Bind(1, sampler);
 		ground.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
 
-		model = glm::translate(glm::mat4(1.0), glm::vec3(3.0));
-		myShader.ModifyUniform("model", model);
+		myShader.ModifyUniform("model", cylinderModel);
 		cylinder.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, WndWidth, WndHeight);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE); // make sure the quad isn’t culled
+
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        screenShader.UseProgram();
+        glActiveTexture(GL_TEXTURE0);
+        glBindSampler(0, 0); // unbind the mipmap sampler so texObj isn't treated as incomplete
+		glBindTexture(GL_TEXTURE_2D, texObj);
+
+		quadMesh.Draw(GL_TRIANGLES, GL_UNSIGNED_INT);
 
 		SwapBuffers(hdc);
 	}

@@ -39,4 +39,5 @@ public:
 	void ModifyUniform1fArray(const char* UniformName, int count, float value[]);
 	void ModifyUniform(const char* UniformName, int value);
 	void ModifyUniform(const char* UniformName, float value);
+
 };
